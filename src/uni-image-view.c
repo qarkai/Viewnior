@@ -658,17 +658,17 @@ uni_image_view_scroll_event (GtkWidget * widget, GdkEventScroll * ev)
     /* Horizontal scroll left is equivalent to scroll up and right is
      * like scroll down. No idea if that is correct -- I have no input
      * device that can do horizontal scrolls. */
-    
+
 	if (vnr_win->prefs->behavior_wheel == VNR_PREFS_WHEEL_ZOOM || (ev->state & GDK_CONTROL_MASK) != 0)
 	{
         switch (ev->direction)
         {
-            case GDK_SCROLL_LEFT: 
+            case GDK_SCROLL_LEFT:
                 // In Zoom mode left/right scroll is used for navigation
-                vnr_window_prev(vnr_win); 
+                vnr_window_prev(vnr_win);
                 break;
-            case GDK_SCROLL_RIGHT: 
-                vnr_window_next(vnr_win, TRUE); 
+            case GDK_SCROLL_RIGHT:
+                vnr_window_next(vnr_win, TRUE);
                 break;
             case GDK_SCROLL_UP:
                 if( ev->state & GDK_SHIFT_MASK ) {
@@ -725,12 +725,12 @@ uni_image_view_scroll_event (GtkWidget * widget, GdkEventScroll * ev)
 	}
 	else
 	{
-		switch (ev->direction) 
+		switch (ev->direction)
 		{
-			case GDK_SCROLL_LEFT: 
-                uni_image_view_scroll (view, GTK_SCROLL_PAGE_LEFT, GTK_SCROLL_NONE); 
+			case GDK_SCROLL_LEFT:
+                uni_image_view_scroll (view, GTK_SCROLL_PAGE_LEFT, GTK_SCROLL_NONE);
                 break;
-			case GDK_SCROLL_RIGHT: 
+			case GDK_SCROLL_RIGHT:
                 uni_image_view_scroll (view, GTK_SCROLL_PAGE_RIGHT, GTK_SCROLL_NONE);
                 break;
             case GDK_SCROLL_UP:
