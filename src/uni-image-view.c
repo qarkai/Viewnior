@@ -534,6 +534,7 @@ static void
 uni_image_view_size_allocate (GtkWidget * widget, GtkAllocation * alloc)
 {
     UniImageView *view = UNI_IMAGE_VIEW (widget);
+
     gtk_widget_set_allocation (widget, alloc);
 
     if (view->pixbuf && view->fitting != UNI_FITTING_NONE)

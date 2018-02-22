@@ -195,7 +195,7 @@ uni_dragger_init (UniDragger * tool)
 {
     tool->view = NULL;
     tool->cache = uni_pixbuf_draw_cache_new ();
-    
+
     tool->pressed = FALSE;
     tool->dragging = FALSE;
     tool->drag_base_x = 0;
