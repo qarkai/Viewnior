@@ -500,14 +500,13 @@ uni_image_view_realize (GtkWidget * widget)
     attrs.height = allocation.height;
     attrs.wclass = GDK_INPUT_OUTPUT;
     attrs.visual = gtk_widget_get_visual (widget);
-    attrs.colormap = gtk_widget_get_colormap (widget);
     attrs.event_mask = (gtk_widget_get_events (widget)
                         | GDK_EXPOSURE_MASK
                         | GDK_BUTTON_MOTION_MASK
                         | GDK_BUTTON_PRESS_MASK
                         | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK);
 
-    int attr_mask = (GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP);
+    int attr_mask = (GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL);
     GdkWindow *parent = gtk_widget_get_parent_window (widget);
 
     GdkWindow *window = gdk_window_new (parent, &attrs, attr_mask);
