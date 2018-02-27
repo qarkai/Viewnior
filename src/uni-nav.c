@@ -204,7 +204,7 @@ static int
 uni_nav_key_press (GtkWidget * widget, GdkEventKey * ev)
 {
     UniNav *nav = UNI_NAV (widget);
-    int retval = gtk_bindings_activate (GTK_OBJECT (nav->view),
+    int retval = gtk_bindings_activate (G_OBJECT (nav->view),
                                         ev->keyval,
                                         ev->state);
     uni_nav_draw_rectangle (nav, TRUE);
