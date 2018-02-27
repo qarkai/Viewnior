@@ -153,12 +153,23 @@ uni_scroll_win_set_view (UniScrollWin * window, UniImageView * view)
    And so it continues.
  */
 static void
-uni_scroll_win_size_request (GtkWidget * widget, GtkRequisition * req)
+uni_scroll_win_get_preferred_height (GtkWidget * widget,
+                                     gint * minimal_height, gint * natural_height)
 {
-    /* Chain up. */
-    GTK_WIDGET_CLASS (uni_scroll_win_parent_class)->size_request
-        (widget, req);
-    req->width = req->height = 200;
+  /* Chain up. */
+  GTK_WIDGET_CLASS (uni_scroll_win_parent_class)->get_preferred_height
+      (widget, minimal_height, natural_height);
+  *minimal_height = *natural_height = 200;
+}
+
+static void
+uni_scroll_win_get_preferred_width (GtkWidget * widget,
+                                     gint * minimal_width, gint * natural_width)
+{
+  /* Chain up. */
+  GTK_WIDGET_CLASS (uni_scroll_win_parent_class)->get_preferred_width
+      (widget, minimal_width, natural_width);
+  *minimal_width = *natural_width = 200;
 }
 
 /*************************************************************/
@@ -233,7 +244,8 @@ uni_scroll_win_class_init (UniScrollWinClass * klass)
     g_object_class_install_property (object_class, PROP_IMAGE_VIEW, pspec);
 
     GtkWidgetClass *widget_class = (GtkWidgetClass *) klass;
-    widget_class->size_request = uni_scroll_win_size_request;
+    widget_class->get_preferred_height = uni_scroll_win_get_preferred_height;
+    widget_class->get_preferred_width = uni_scroll_win_get_preferred_width;
 }
 
 /**
