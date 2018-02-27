@@ -41,7 +41,7 @@ struct _UniDragger {
     GObject parent;
     GtkWidget *view;
     UniPixbufDrawCache *cache;
-    
+
     gboolean pressed;
     gboolean dragging;
 
@@ -52,8 +52,8 @@ struct _UniDragger {
     /* Current position of the mouse. */
     int drag_ofs_x;
     int drag_ofs_y;
-    
-    
+
+
     /* Cursor to use when grabbing. */
     GdkCursor *grab_cursor;
 };
@@ -86,7 +86,7 @@ void    uni_dragger_pixbuf_changed      (UniDragger * tool,
 
 void    uni_dragger_paint_image         (UniDragger * tool,
                                          UniPixbufDrawOpts * opts,
-                                         GdkDrawable * drawable);
+                                         GdkWindow * drawable);
 
 G_END_DECLS
 #endif /* __UNI_TOOL_DRAGGER_H__ */

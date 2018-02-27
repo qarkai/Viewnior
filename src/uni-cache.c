@@ -211,7 +211,7 @@ uni_pixbuf_draw_cache_scroll_intersection (GdkPixbuf * pixbuf,
 static void
 uni_pixbuf_draw_cache_intersect_draw (UniPixbufDrawCache * cache,
                                       UniPixbufDrawOpts * opts,
-                                      GdkDrawable * drawable)
+                                      GdkWindow * drawable)
 {
     GdkRectangle this = opts->zoom_rect;
     GdkRectangle old_rect = cache->old.zoom_rect;
@@ -259,14 +259,14 @@ uni_pixbuf_draw_cache_intersect_draw (UniPixbufDrawCache * cache,
  * uni_pixbuf_draw_cache_draw:
  * @cache: a #UniPixbufDrawCache
  * @opts: the #UniPixbufDrawOpts to use in this draw
- * @drawable: a #GdkDrawable to draw on
+ * @drawable: a #GdkWindow to draw on
  *
  * Redraws the area specified in the pixbuf draw options in an
  * efficient way by using caching.
  **/
 void
 uni_pixbuf_draw_cache_draw (UniPixbufDrawCache * cache,
-                            UniPixbufDrawOpts * opts, GdkDrawable * drawable)
+                            UniPixbufDrawOpts * opts, GdkWindow * drawable)
 {
     GdkRectangle this = opts->zoom_rect;
     UniPixbufDrawMethod method =

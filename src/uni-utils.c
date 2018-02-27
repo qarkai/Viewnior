@@ -64,7 +64,7 @@ uni_pixbuf_scale_blend (GdkPixbuf * src,
  * draw a pixel at position (0,0).
  **/
 void
-uni_draw_rect (GdkDrawable * drawable,
+uni_draw_rect (GdkWindow * drawable,
                GdkGC * gc, gboolean filled, GdkRectangle * rect)
 {
     if (rect->width <= 0 || rect->height <= 0)

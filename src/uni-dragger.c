@@ -139,7 +139,7 @@ uni_dragger_pixbuf_changed (UniDragger * tool,
 
 void
 uni_dragger_paint_image (UniDragger * tool,
-                         UniPixbufDrawOpts * opts, GdkDrawable * drawable)
+                         UniPixbufDrawOpts * opts, GdkWindow * drawable)
 {
     uni_pixbuf_draw_cache_draw (tool->cache, opts, drawable);
 }
