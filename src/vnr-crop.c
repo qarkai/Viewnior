@@ -265,7 +265,8 @@ spin_height_cb (GtkSpinButton *spinbutton, VnrCrop *crop)
 static gboolean
 drawable_expose_cb (GtkWidget *widget, GdkEventExpose *event, VnrCrop *crop)
 {
-    GdkWindow *window = gtk_widget_get_window(widget);
+    GdkWindow *window = gtk_widget_get_window (widget);
+
     gdk_draw_pixbuf (GDK_DRAWABLE(window), NULL, crop->preview_pixbuf,
                      0, 0, 0, 0, -1, -1, GDK_RGB_DITHER_NORMAL, 0, 0);
 
