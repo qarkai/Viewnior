@@ -183,11 +183,12 @@ uni_nav_expose_drawing_area (GtkWidget * widget,
     if (!nav->pixbuf)
         return FALSE;
 
-    window = gtk_widget_get_window (nav->preview);
-    style = gtk_widget_get_style (nav->preview);
+    cairo_t *cr = gdk_cairo_create (gtk_widget_get_window (nav->preview));
 
-    gdk_draw_pixbuf (window, style->white_gc, nav->pixbuf,
-                     0, 0, 0, 0, -1, -1, GDK_RGB_DITHER_MAX, 0, 0);
+    gdk_cairo_set_source_pixbuf (cr, nav->pixbuf, 0, 0);
+    cairo_paint (cr);
+    cairo_destroy (cr);
+
     uni_nav_draw_rectangle (nav, FALSE);
     uni_nav_update_position (nav);
     return TRUE;

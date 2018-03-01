@@ -266,9 +266,11 @@ static gboolean
 drawable_expose_cb (GtkWidget *widget, GdkEventExpose *event, VnrCrop *crop)
 {
     GdkWindow *window = gtk_widget_get_window (widget);
+    cairo_t *cr = gdk_cairo_create (window);
 
-    gdk_draw_pixbuf (GDK_DRAWABLE(window), NULL, crop->preview_pixbuf,
-                     0, 0, 0, 0, -1, -1, GDK_RGB_DITHER_NORMAL, 0, 0);
+    gdk_cairo_set_source_pixbuf (cr, crop->preview_pixbuf, 0, 0);
+    cairo_paint (cr);
+    cairo_destroy (cr);
 
     crop->gc = gdk_gc_new(GDK_DRAWABLE(window));
     gdk_gc_set_function (crop->gc, GDK_INVERT);

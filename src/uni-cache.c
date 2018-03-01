@@ -271,6 +271,7 @@ uni_pixbuf_draw_cache_draw (UniPixbufDrawCache * cache,
     GdkRectangle this = opts->zoom_rect;
     UniPixbufDrawMethod method =
         uni_pixbuf_draw_cache_get_method (&cache->old, opts);
+    cairo_t *cr = gdk_cairo_create (drawable);
     int deltax = 0;
     int deltay = 0;
     if (method == UNI_PIXBUF_DRAW_METHOD_CONTAINS)
@@ -307,13 +308,10 @@ uni_pixbuf_draw_cache_draw (UniPixbufDrawCache * cache,
                                 (double) -this.x, (double) -this.y,
                                 opts->zoom, opts->interp, this.x, this.y);
     }
-    gdk_draw_pixbuf (drawable,
-                     NULL,
-                     cache->last_pixbuf,
-                     deltax, deltay,
-                     opts->widget_x, opts->widget_y,
-                     this.width, this.height,
-                     GDK_RGB_DITHER_MAX, opts->widget_x, opts->widget_y);
+    gdk_cairo_set_source_pixbuf (cr, cache->last_pixbuf,
+                                 opts->widget_x, opts->widget_y);
+    cairo_paint (cr);
+    cairo_destroy (cr);
     if (method != UNI_PIXBUF_DRAW_METHOD_CONTAINS)
         cache->old = *opts;
 }
