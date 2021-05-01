@@ -34,10 +34,7 @@ GList * supported_mime_types;
 static gint
 compare_files(VnrFile *file, char *uri)
 {
-    if(g_strcmp0(uri, file->path) == 0)
-        return 0;
-    else
-        return 1;
+    return g_strcmp0(uri, file->path);
 }
 
 /* Modified version of eog's eog_image_get_supported_mime_types */

@@ -46,7 +46,7 @@ struct _VnrCrop {
     gdouble width;
     gdouble height;
 
-    GdkGC *gc;
+    cairo_t *cr;
     GtkWidget *image;
     GtkSpinButton *spin_x;
     GtkSpinButton *spin_y;

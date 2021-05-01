@@ -56,23 +56,6 @@ uni_pixbuf_scale_blend (GdkPixbuf * src,
                           offset_x, offset_y, zoom, zoom, interp);
 }
 
-/**
- * uni_draw_rect:
- *
- * This function is a fixed version of gdk_draw_rectangle. The GDK
- * function is broken in that drawing a the rectangle (0,0)-[0,0] will
- * draw a pixel at position (0,0).
- **/
-void
-uni_draw_rect (GdkWindow * drawable,
-               GdkGC * gc, gboolean filled, GdkRectangle * rect)
-{
-    if (rect->width <= 0 || rect->height <= 0)
-        return;
-    gdk_draw_rectangle (drawable, gc, filled,
-                        rect->x, rect->y, rect->width - 1, rect->height - 1);
-}
-
 void
 uni_rectangle_get_rects_around (GdkRectangle * outer,
                                 GdkRectangle * inner, GdkRectangle around[4])

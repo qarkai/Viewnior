@@ -27,11 +27,10 @@
 static gboolean
 uni_rectangle_contains_rect (GdkRectangle r1, GdkRectangle r2)
 {
-    return
-        r1.x <= r2.x &&
-        r1.y <= r2.y &&
-        (r2.x + r2.width) <= (r1.x + r1.width) &&
-        (r2.y + r2.height) <= (r1.y + r1.height);
+    return r1.x <= r2.x
+        && r1.y <= r2.y
+        && (r2.x + r2.width) <= (r1.x + r1.width)
+        && (r2.y + r2.height) <= (r1.y + r1.height);
 }
 
 static void
@@ -93,19 +92,13 @@ UniPixbufDrawMethod
 uni_pixbuf_draw_cache_get_method (UniPixbufDrawOpts * old,
                                   UniPixbufDrawOpts * new_)
 {
-    if (new_->zoom != old->zoom ||
-        new_->interp != old->interp || new_->pixbuf != old->pixbuf)
-    {
+    if (new_->zoom != old->zoom || new_->interp != old->interp || new_->pixbuf != old->pixbuf)
         return UNI_PIXBUF_DRAW_METHOD_SCALE;
-    }
-    else if (uni_rectangle_contains_rect (old->zoom_rect, new_->zoom_rect))
-    {
+
+    if (uni_rectangle_contains_rect (old->zoom_rect, new_->zoom_rect))
         return UNI_PIXBUF_DRAW_METHOD_CONTAINS;
-    }
-    else
-    {
-        return UNI_PIXBUF_DRAW_METHOD_SCROLL;
-    }
+
+    return UNI_PIXBUF_DRAW_METHOD_SCROLL;
 }
 
 /**
@@ -210,8 +203,7 @@ uni_pixbuf_draw_cache_scroll_intersection (GdkPixbuf * pixbuf,
  **/
 static void
 uni_pixbuf_draw_cache_intersect_draw (UniPixbufDrawCache * cache,
-                                      UniPixbufDrawOpts * opts,
-                                      GdkWindow * drawable)
+                                      UniPixbufDrawOpts * opts)
 {
     GdkRectangle this = opts->zoom_rect;
     GdkRectangle old_rect = cache->old.zoom_rect;
@@ -281,7 +273,7 @@ uni_pixbuf_draw_cache_draw (UniPixbufDrawCache * cache,
     }
     else if (method == UNI_PIXBUF_DRAW_METHOD_SCROLL)
     {
-        uni_pixbuf_draw_cache_intersect_draw (cache, opts, drawable);
+        uni_pixbuf_draw_cache_intersect_draw (cache, opts);
     }
     else if (method == UNI_PIXBUF_DRAW_METHOD_SCALE)
     {
@@ -308,10 +300,20 @@ uni_pixbuf_draw_cache_draw (UniPixbufDrawCache * cache,
                                 (double) -this.x, (double) -this.y,
                                 opts->zoom, opts->interp, this.x, this.y);
     }
+#if 0
+    gdk_draw_pixbuf (drawable,
+                     NULL,
+                     cache->last_pixbuf,
+                     deltax, deltay,
+                     opts->widget_x, opts->widget_y,
+                     this.width, this.height,
+                     GDK_RGB_DITHER_MAX, opts->widget_x, opts->widget_y);
+#else
     gdk_cairo_set_source_pixbuf (cr, cache->last_pixbuf,
                                  opts->widget_x, opts->widget_y);
     cairo_paint (cr);
     cairo_destroy (cr);
+#endif
     if (method != UNI_PIXBUF_DRAW_METHOD_CONTAINS)
         cache->old = *opts;
 }

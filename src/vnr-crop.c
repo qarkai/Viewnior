@@ -26,6 +26,8 @@
 
 G_DEFINE_TYPE (VnrCrop, vnr_crop, G_TYPE_OBJECT);
 
+static void vnr_crop_draw_rectangle(VnrCrop *crop);
+
 static void spin_x_cb       (GtkSpinButton *spinbutton, VnrCrop *crop);
 static void spin_width_cb   (GtkSpinButton *spinbutton, VnrCrop *crop);
 static void spin_y_cb       (GtkSpinButton *spinbutton, VnrCrop *crop);
@@ -46,19 +48,17 @@ static gboolean drawable_motion_cb (GtkWidget *widget,
 static void
 vnr_crop_clear_rectangle(VnrCrop *crop)
 {
-    if(crop->do_redraw)
-        gdk_draw_rectangle (GDK_DRAWABLE(gtk_widget_get_window(crop->image)), crop->gc, FALSE,
-                            crop->sub_x, crop->sub_y,
-                            crop->sub_width, crop->sub_height);
+    vnr_crop_draw_rectangle(crop);
 }
 
 static void
 vnr_crop_draw_rectangle(VnrCrop *crop)
 {
     if(crop->do_redraw)
-        gdk_draw_rectangle (GDK_DRAWABLE(gtk_widget_get_window(crop->image)), crop->gc, FALSE,
-                            crop->sub_x, crop->sub_y,
-                            crop->sub_width, crop->sub_height);
+    {
+        cairo_rectangle (crop->cr, crop->sub_x, crop->sub_y, crop->sub_width, crop->sub_height);
+        cairo_stroke (crop->cr);
+    }
 }
 
 static void
@@ -265,18 +265,20 @@ spin_height_cb (GtkSpinButton *spinbutton, VnrCrop *crop)
 static gboolean
 drawable_expose_cb (GtkWidget *widget, GdkEventExpose *event, VnrCrop *crop)
 {
-    GdkWindow *window = gtk_widget_get_window (widget);
-    cairo_t *cr = gdk_cairo_create (window);
+    GdkWindow *window = gtk_widget_get_window(widget);
 
-    gdk_cairo_set_source_pixbuf (cr, crop->preview_pixbuf, 0, 0);
-    cairo_paint (cr);
-    cairo_destroy (cr);
+    crop->cr = gdk_cairo_create(window);
+#if 0
+    gdk_draw_pixbuf (GDK_DRAWABLE(window), NULL, crop->preview_pixbuf,
+                     0, 0, 0, 0, -1, -1, GDK_RGB_DITHER_NORMAL, 0, 0);
+#else
+    gdk_cairo_set_source_pixbuf (crop->cr, crop->preview_pixbuf, 0, 0);
+    cairo_paint (crop->cr);
+#endif
 
-    crop->gc = gdk_gc_new(GDK_DRAWABLE(window));
-    gdk_gc_set_function (crop->gc, GDK_INVERT);
-    gdk_gc_set_line_attributes (crop->gc,
-                                2,
-                                GDK_LINE_SOLID, GDK_CAP_BUTT, GDK_JOIN_MITER);
+    /* white + DIFFERENCE -> invert */
+    cairo_set_source_rgb (crop->cr, 1.0, 1.0, 1.0);
+    cairo_set_operator (crop->cr, CAIRO_OPERATOR_DIFFERENCE);
 
     if(crop->sub_width == -1)
     {
@@ -390,8 +392,8 @@ vnr_crop_dispose (GObject *gobject)
 
     if (self->preview_pixbuf != NULL)
         g_object_unref (self->preview_pixbuf);
-    if (self->gc != NULL)
-        g_object_unref (self->gc);
+    if (self->cr != NULL)
+        cairo_destroy (self->cr);
 
     G_OBJECT_CLASS (vnr_crop_parent_class)->dispose (gobject);
 }
@@ -429,7 +431,7 @@ vnr_crop_init (VnrCrop *crop)
     crop->height = -1;
     crop->width = -1;
 
-    crop->gc = NULL;
+    crop->cr = NULL;
     crop->image = NULL;
     crop->spin_x = NULL;
     crop->spin_y = NULL;

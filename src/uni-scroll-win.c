@@ -152,6 +152,7 @@ uni_scroll_win_set_view (UniScrollWin * window, UniImageView * view)
 
    And so it continues.
  */
+#if !GTK_CHECK_VERSION(3, 0, 0)
 static void
 uni_scroll_win_get_preferred_height (GtkWidget * widget,
                                      gint * minimal_height, gint * natural_height)
@@ -171,7 +172,29 @@ uni_scroll_win_get_preferred_width (GtkWidget * widget,
       (widget, minimal_width, natural_width);
   *minimal_width = *natural_width = 200;
 }
+#else
+static void
+uni_scroll_win_get_preferred_width (GtkWidget * widget,
+                                    gint * minimum_width,
+                                    gint * natural_width)
+{
+    /* Chain up. */
+    GTK_WIDGET_CLASS (uni_scroll_win_parent_class)->get_preferred_width
+        (widget, minimum_width, natural_width);
+    *minimum_width = *natural_width = 200; // FIXME
+}
 
+static void
+uni_scroll_win_get_preferred_height (GtkWidget * widget,
+                                     gint * minimum_height,
+                                     gint * natural_height)
+{
+    /* Chain up. */
+    GTK_WIDGET_CLASS (uni_scroll_win_parent_class)->get_preferred_height
+        (widget, minimum_height, natural_height);
+    *minimum_height = *natural_height = 200; // FIXME
+}
+#endif
 /*************************************************************/
 /***** Stuff that deals with the type ************************/
 /*************************************************************/
@@ -244,8 +267,12 @@ uni_scroll_win_class_init (UniScrollWinClass * klass)
     g_object_class_install_property (object_class, PROP_IMAGE_VIEW, pspec);
 
     GtkWidgetClass *widget_class = (GtkWidgetClass *) klass;
-    widget_class->get_preferred_height = uni_scroll_win_get_preferred_height;
+#if !GTK_CHECK_VERSION(3, 0, 0)
+    widget_class->size_request = uni_scroll_win_size_request;
+#else
     widget_class->get_preferred_width = uni_scroll_win_get_preferred_width;
+    widget_class->get_preferred_height = uni_scroll_win_get_preferred_height;
+#endif
 }
 
 /**

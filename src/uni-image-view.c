@@ -212,6 +212,26 @@ uni_image_view_zoom_to_fit (UniImageView * view, gboolean is_allocating)
     uni_image_view_set_zoom_no_center (view, zoom, is_allocating);
 }
 
+/**
+ * uni_draw_rect:
+ *
+ * This function is a fixed version of gdk_draw_rectangle. The GDK
+ * function is broken in that drawing a the rectangle (0,0)-[0,0] will
+ * draw a pixel at position (0,0).
+ *
+ * TODO: check if cairo_rectangle is broken the same way
+ **/
+static void
+uni_draw_rect (cairo_t * cr, gboolean filled, GdkRectangle * rect)
+{
+    if (rect->width <= 0 || rect->height <= 0)
+        return;
+
+    cairo_rectangle (cr, rect->x, rect->y, rect->width - 1, rect->height - 1);
+    if (filled)
+        cairo_fill (cr);
+}
+
 static void
 uni_image_view_draw_background (UniImageView * view,
                                 GdkRectangle * image_area, Size alloc)
@@ -219,10 +239,9 @@ uni_image_view_draw_background (UniImageView * view,
     GtkWidget *widget = GTK_WIDGET (view);
     int n;
 
-    GtkStyle *style = gtk_widget_get_style (widget);
-    GdkGC *gc = style->bg_gc[GTK_STATE_NORMAL];
-
     GdkWindow *window = gtk_widget_get_window (widget);
+    /* TODO: get and use background color */
+    cairo_t *cr = gdk_cairo_create (window);
 
     GdkRectangle borders[4];
     GdkRectangle outer = { 0, 0, alloc.width, alloc.height };
@@ -232,8 +251,9 @@ uni_image_view_draw_background (UniImageView * view,
         // Not sure why incrementing the size is necessary.
         borders[n].width++;
         borders[n].height++;
-        uni_draw_rect (window, gc, TRUE, &borders[n]);
+        uni_draw_rect (cr, TRUE, &borders[n]);
     }
+    cairo_destroy (cr);
 }
 
 /**
@@ -341,9 +361,9 @@ uni_image_view_fast_scroll (UniImageView * view, int delta_x, int delta_y)
        overlaps this window, it will temporarily look corrupted. We
        fix that later by turning on "exposures." See below. */
 
-    GdkGC *gc = gdk_gc_new (drawable);
     Size alloc = uni_image_view_get_allocated_size (view);
-
+#if 0
+    GdkGC *gc = gdk_gc_new (drawable);
     gdk_gc_set_exposures (gc, TRUE);
     gdk_draw_drawable (drawable,
                        gc,
@@ -353,7 +373,19 @@ uni_image_view_fast_scroll (UniImageView * view, int delta_x, int delta_y)
                        alloc.width - abs (delta_x),
                        alloc.height - abs (delta_y));
     g_object_unref (gc);
-
+#else
+    cairo_t *cr = gdk_cairo_create (drawable);
+    gdk_cairo_rectangle (cr, /*GdkRectangle*/NULL);
+    cairo_clip (cr);
+    /* Now push a group to change the target */
+    cairo_push_group (cr);
+    cairo_set_source_surface (cr, drawable, abs (delta_x), abs (delta_y));
+    cairo_paint (cr);
+    /* Now copy the intermediate target back */
+    cairo_pop_group_to_source (cr);
+    cairo_paint (cr);
+    cairo_destroy (cr);
+#endif
     /* If we moved in both the x and y directions, two "strips" of the
        image becomes visible. One horizontal strip and one vertical
        strip. */
@@ -500,13 +532,16 @@ uni_image_view_realize (GtkWidget * widget)
     attrs.height = allocation.height;
     attrs.wclass = GDK_INPUT_OUTPUT;
     attrs.visual = gtk_widget_get_visual (widget);
+#if !GTK_CHECK_VERSION(3, 0, 0)
+    attrs.colormap = gtk_widget_get_colormap (widget);
+#endif
     attrs.event_mask = (gtk_widget_get_events (widget)
                         | GDK_EXPOSURE_MASK
                         | GDK_BUTTON_MOTION_MASK
                         | GDK_BUTTON_PRESS_MASK
                         | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK);
 
-    int attr_mask = (GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL);
+    int attr_mask = (GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL /*| GDK_WA_COLORMAP*/);
     GdkWindow *parent = gtk_widget_get_parent_window (widget);
 
     GdkWindow *window = gdk_window_new (parent, &attrs, attr_mask);
@@ -758,7 +793,7 @@ uni_image_view_set_scroll_adjustments (UniImageView * view,
         g_signal_handlers_disconnect_by_data (G_OBJECT (view->hadj), view);
         g_object_unref (view->hadj);
         g_signal_connect (G_OBJECT (hadj),
-                          "value_changed",
+                          "value-changed",
                           G_CALLBACK (uni_image_view_hadj_changed_cb), view);
         view->hadj = hadj;
         g_object_ref_sink (view->hadj);
@@ -768,7 +803,7 @@ uni_image_view_set_scroll_adjustments (UniImageView * view,
         g_signal_handlers_disconnect_by_data (G_OBJECT (view->vadj), view);
         g_object_unref (view->vadj);
         g_signal_connect (G_OBJECT (vadj),
-                          "value_changed",
+                          "value-changed",
                           G_CALLBACK (uni_image_view_vadj_changed_cb), view);
         view->vadj = vadj;
         g_object_ref_sink (view->vadj);
@@ -915,7 +950,9 @@ uni_image_view_class_init (UniImageViewClass * klass)
     GtkWidgetClass *widget_class = (GtkWidgetClass *) klass;
     widget_class->button_press_event = uni_image_view_button_press;
     widget_class->button_release_event = uni_image_view_button_release;
+#if !GTK_CHECK_VERSION(3, 0, 0)
     widget_class->expose_event = uni_image_view_expose;
+#endif
     widget_class->motion_notify_event = uni_image_view_motion_notify;
     widget_class->realize = uni_image_view_realize;
     widget_class->scroll_event = uni_image_view_scroll_event;
@@ -929,6 +966,7 @@ uni_image_view_class_init (UniImageViewClass * klass)
     klass->scroll = uni_image_view_scroll;
     klass->pixbuf_changed = NULL;
 
+#if !GTK_CHECK_VERSION(3, 0, 0)
     /**
      * UniImageView::set-scroll-adjustments
      *
@@ -945,6 +983,7 @@ uni_image_view_class_init (UniImageViewClass * klass)
                       uni_marshal_VOID__POINTER_POINTER,
                       G_TYPE_NONE,
                       2, GTK_TYPE_ADJUSTMENT, GTK_TYPE_ADJUSTMENT);
+#endif
     klass->set_scroll_adjustments = uni_image_view_set_scroll_adjustments;
 
     /* Add keybindings. */
