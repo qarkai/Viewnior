@@ -404,7 +404,7 @@ uni_image_view_fast_scroll (UniImageView * view, int delta_x, int delta_y)
         alloc.height
     };
     uni_image_view_repaint_area (view, &vert_strip);
-
+#if 0
     /* Here is where we fix the weirdness mentioned above. I do not
      * really know why it works, but it does! */
     GdkEvent *ev;
@@ -417,6 +417,7 @@ uni_image_view_fast_scroll (UniImageView * view, int delta_x, int delta_y)
         if (exp_count == 0)
             break;
     }
+#endif
 }
 
 /**
